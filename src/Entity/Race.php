@@ -3,6 +3,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -39,11 +40,35 @@ class Race
      * The date of the race 
      * @ORM\Column(type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */ 
-    private ?\DateTimeInterface  $createdAt = null;    
+    private ?\DateTimeInterface  $createdAt = null;  
+    
+    /**
+     * @var RacingData[] Availble racing raw data for this race
+     * 
+     * @ORM\OneToMany(
+     * targetEntity="RacingData", 
+     * mappedBy="race",
+     * cascade={"persist", "remove"})
+     */
+    private iterable $racingData;
+
+    /**
+     * @var Placement[] Availble placements/results for this race
+     * 
+     * @ORM\OneToMany(
+     * targetEntity="Placement", 
+     * mappedBy="race",
+     * cascade={"persist", "remove"})
+     */
+    private iterable $placementData;
+    
+    
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();        
+        $this->createdAt = new \DateTime();  
+        $this->racingData = new ArrayCollection();
+        $this->placementData = new ArrayCollection();  
     }
 
     
@@ -77,6 +102,22 @@ class Race
         $this->raceDate = $raceDate;
 
         return $this;
+    }
+
+    /**
+     * @return RacingData[]
+     */
+    public function getRacingData(): iterable|ArrayCollection
+    {
+        return $this->racingData;
+    }
+
+    /**
+     * @return Placement[]
+     */
+    public function getPlacementData(): iterable|ArrayCollection
+    {
+        return $this->placementData;
     }
     
 }
