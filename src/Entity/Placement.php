@@ -97,12 +97,12 @@ class Placement
         return $this;
     }
 
-    public function getFinishTime(): ?string
+    public function getfinishTime(): ?string
     {
         return $this->finishTime;
     }
 
-    public function setFinishTime(string $finishTime): self
+    public function setfinishTime(string $finishTime): self
     {
         $this->finishTime = $finishTime;
 
