@@ -26,13 +26,15 @@ class RacingData
     /** 
      * The full name of the racer 
      * @ORM\Column
-     */    
+     */ 
+    #[Assert\NotBlank]   
     private string $fullName = '';
 
     /**
      * @ORM\Column(type="string", length=10)
      * @Assert\Choice(choices={"medium", "long"})
      */
+    #[Assert\NotBlank]
     private $raceDistance;
 
     /**
@@ -42,12 +44,14 @@ class RacingData
      *     message="The time format should be 'h:mm:ss'"
      * )
      */
+    #[Assert\NotBlank]
     private string $raceTime;
 
     /** 
      * The age Category of the racer 
      * @ORM\Column
-     */    
+     */  
+    #[Assert\NotBlank]  
     private string $ageCategory = '';
 
     /**
@@ -55,6 +59,7 @@ class RacingData
      * 
      * @ORM\ManyToOne(targetEntity="Race", inversedBy="races")
      */
+    #[Assert\NotBlank]
     private Race $race;
 
        /** 
@@ -74,6 +79,7 @@ class RacingData
      */
     public function getId(): ?int
     {
+        
         return $this->id;
     }
     

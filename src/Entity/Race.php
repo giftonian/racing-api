@@ -2,17 +2,23 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filtefr\SearchFilter;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Controller\RaceResults;
+
+
 
 /**
  * 
  * @ORM\Entity
  */
 #[ApiResource]
+#[ORM\Entity(repositoryClass: MovieRepository::class)]
 class Race
 {
    
@@ -27,12 +33,14 @@ class Race
      * The full name of the racer 
      * @ORM\Column
      */    
+    #[Assert\NotBlank]
     private string $title = '';
 
     /** 
      * The date of the race 
      * @ORM\Column(type="date")
-     */        
+     */ 
+    #[Assert\NotBlank]       
     private ?\DateTimeInterface  $raceDate = null; // received as date in API request
 
 

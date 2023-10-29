@@ -26,7 +26,8 @@ class Placement
     /** 
      * The full name of the racer 
      * @ORM\Column
-     */    
+     */  
+    #[Assert\NotBlank]  
     private string $fullName = '';
 
     /**
@@ -36,18 +37,21 @@ class Placement
      *     message="The time format should be 'h:mm:ss'"
      * )
      */
+    #[Assert\NotBlank]
     private string $finishTime;
 
     /**
      * Overall Placement
      * @ORM\Column(type="integer")     
      */
+    #[Assert\NotBlank]
     private $overAllPlace;
 
     /**
      * Age Category Placement
      * @ORM\Column(type="integer")     
      */
+    #[Assert\NotBlank]
     private $ageCatPlace;
 
     
@@ -65,7 +69,7 @@ class Placement
      */
     private Race $race;
 
-       /** 
+    /** 
      * The date of the race 
      * @ORM\Column(type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */ 
