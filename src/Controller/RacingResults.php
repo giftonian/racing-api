@@ -16,6 +16,8 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Factory\JsonResponseFactory;
+use DateTimeImmutable;
+use Symfony\Component\Serializer\SerializerInterface;
 
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Mime\Parser;
@@ -61,22 +63,58 @@ class RacingResults extends AbstractController
 
 
     #[Route('/api/race-results/upload-csv', name: 'races_upload', methods: ['POST'])]    
-    public function uploadRaceResultsCSV(Request $request): JsonResponse
+    public function uploadRaceResultsCSV(Request $request, SerializerInterface $serializer): JsonResponse
     {
         //var_dump($request->getContent());
         
         // Get the request content (multipart/form-data)
         //$requestContent = $request->getContent();
         
-        $race_title = $request->request->get('race_title');
-        $race_date = $request->request->get('race_date');
+        $race = new Race();
+        $race_data = [];
+        $race_data['race_title'] = $request->request->get('race_title');
+        $race_data['race_date'] = $request->request->get('race_date');
         $csv_data = $request->files->get('csv_data');
+        $uploadedFile = $request->files->get('csv_data');
         //dd($csv_data);
+
+        $race->setTitle($race_data['race_title']);
+        $race->setRaceDate(new DateTimeImmutable( $race_data['race_date']));
+        $this->em->persist($race);
+        $this->em->flush();
+
+        $originalFilename = '';
+        if ($uploadedFile) {
+            $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+            
+            // Generate a unique name for the file
+            $newFilename = $originalFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
+
+            // Move the file to the specified directory
+            $csvDirectory = 'racing_uploads';
+            $uploadedFile->move($csvDirectory, $newFilename);
+
+            // Parse the CSV file row by row
+            $csvFilePath = $csvDirectory.'/'.$newFilename;
+
+            if (($handle = fopen($csvFilePath, 'r')) !== false) {
+                while (($data = fgetcsv($handle, 1000, ',')) !== false) {
+                    /*$race = new Race();
+                    $race->setRaceTitle($race_title);
+                    $race->setRaceDate($race_date);
+                    $race->setRaceResult($data);
+                    $this->em->persist($race);
+                    $this->em->flush();*/
+                    echo $data[1].'\n';
+                }
+                fclose($handle);
+            }
+        }
         
         
         return $this->json([
             'code' => 200,
-            'data' => $csv_data,
+            'data' => $originalFilename,
         ]);
         
     }
