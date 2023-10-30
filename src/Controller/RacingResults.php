@@ -10,7 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Entity\Race;
-
+use App\Entity\RacingData;
 use App\Repository\RaceRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -63,7 +63,7 @@ class RacingResults extends AbstractController
 
 
     #[Route('/api/race-results/upload-csv', name: 'races_upload', methods: ['POST'])]    
-    public function uploadRaceResultsCSV(Request $request, SerializerInterface $serializer): JsonResponse
+    public function uploadRaceResultsCSV(Request $request): JsonResponse
     {
         //var_dump($request->getContent());
         
@@ -78,45 +78,82 @@ class RacingResults extends AbstractController
         $uploadedFile = $request->files->get('csv_data');
         //dd($csv_data);
 
-        $race->setTitle($race_data['race_title']);
-        $race->setRaceDate(new DateTimeImmutable( $race_data['race_date']));
-        $this->em->persist($race);
-        $this->em->flush();
+        try {
 
-        $originalFilename = '';
-        if ($uploadedFile) {
-            $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-            
-            // Generate a unique name for the file
-            $newFilename = $originalFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
+            $this->em->beginTransaction(); // starting the DB Transaction
 
-            // Move the file to the specified directory
-            $csvDirectory = 'racing_uploads';
-            $uploadedFile->move($csvDirectory, $newFilename);
+            $race->setTitle($race_data['race_title']);
+            $race->setRaceDate(new DateTimeImmutable( $race_data['race_date']));
+            $this->em->persist($race);
+            //$this->em->flush();
 
-            // Parse the CSV file row by row
-            $csvFilePath = $csvDirectory.'/'.$newFilename;
+            $raceId = $race->getId();
 
-            if (($handle = fopen($csvFilePath, 'r')) !== false) {
-                while (($data = fgetcsv($handle, 1000, ',')) !== false) {
-                    /*$race = new Race();
-                    $race->setRaceTitle($race_title);
-                    $race->setRaceDate($race_date);
-                    $race->setRaceResult($data);
-                    $this->em->persist($race);
-                    $this->em->flush();*/
-                    echo $data[1].'\n';
+            $originalFilename = '';
+            if ($uploadedFile) {
+                $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+                
+                // Generate a unique name for the file
+                $newFilename = $originalFilename.'-'.uniqid().'.'.$uploadedFile->guessExtension();
+
+                // Move the file to the specified directory
+                $csvDirectory = 'racing_uploads';
+                $uploadedFile->move($csvDirectory, $newFilename);
+
+                // Parse the CSV file row by row
+                $csvFilePath = $csvDirectory.'/'.$newFilename;
+
+                $fullName = '';
+                $raceDistance = '';
+                $raceTime = '';
+                $ageCategory = '';
+
+                //$racingData = new RacingData();
+                if (($handle = fopen($csvFilePath, 'r')) !== false) {
+                    while (($data = fgetcsv($handle, 1000, ',')) !== false) {
+                        $fullName       = $data[0];
+                        $raceDistance   = $data[1];
+                        $raceTime       = $data[2];
+                        $ageCategory    = $data[3];
+
+                        $racingData = new RacingData();
+                        $racingData->setFullName($fullName);
+                        $racingData->setRaceDistance($raceDistance);
+                        $racingData->setRaceTime($raceTime);
+                        $racingData->setAgeCategory($ageCategory);
+                        $racingData->setRace($race);
+
+                        $this->em->persist($racingData);
+                        
+                    }
+                    $this->em->flush();
+                    $this->em->commit();
+                    fclose($handle);
                 }
-                fclose($handle);
             }
+        } catch (\Exception $e) {
+            $this->em->rollback();  
+            return $this->json([
+                'code' => 401,
+                'message' => 'Error occured while processing the CSV file'
+            ]);          
         }
         
         
         return $this->json([
             'code' => 200,
-            'data' => $originalFilename,
+            'message' => 'Race Data saved successfully!',
         ]);
         
+    } // end function uploadRaceResultsCSV
+
+    #[Route('/api/get-races-collection', name: 'get_races_collection', methods: ['GET'])]    
+    public function getRacesCollection(Request $request): JsonResponse
+    {
+        return $this->json([
+            'code' => 200,
+            'message' => 'getting races...',
+        ]);
     }
 
     
