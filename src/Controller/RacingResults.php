@@ -113,7 +113,7 @@ class RacingResults extends AbstractController
                     while (($data = fgetcsv($handle, 1000, ',')) !== false) {
                         $fullName       = $data[0];
                         $raceDistance   = $data[1];
-                        $raceTime       = $data[2];
+                        $raceTime       = $this->formatRaceTime($data[2]);
                         $ageCategory    = $data[3];
 
                         $racingData = new RacingData();
@@ -154,6 +154,22 @@ class RacingResults extends AbstractController
             'code' => 200,
             'message' => 'getting races...',
         ]);
+    }
+
+    public function formatRaceTime($raceTime)
+    {
+        // Split the time into hours, minutes, and seconds
+        list($hours, $minutes, $seconds) = explode(":", $raceTime);
+
+        // Use str_pad to add a leading "0" if necessary
+        $hours = str_pad($hours, 2, "0", STR_PAD_LEFT);
+        $minutes = str_pad($minutes, 2, "0", STR_PAD_LEFT);
+        $seconds = str_pad($seconds, 2, "0", STR_PAD_LEFT);
+
+        // Format the time as "hh:mm:ss"
+        $formattedTime = "$hours:$minutes:$seconds";
+
+        return $formattedTime;
     }
 
     
