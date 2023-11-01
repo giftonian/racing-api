@@ -150,9 +150,18 @@ class RacingResults extends AbstractController
     #[Route('/api/get-races-collection', name: 'get_races_collection', methods: ['GET'])]    
     public function getRacesCollection(Request $request): JsonResponse
     {
+        $racingDataRepository = $this->em->getRepository(Race::class);
+        $raceCollections = $racingDataRepository->fetchRaceCollections();
+        if (empty($raceCollections)) {
+            return $this->json([
+                'code' => 401,
+                'message' => 'No data found'
+            ]);
+        }
+
         return $this->json([
             'code' => 200,
-            'message' => 'getting races...',
+            'data' => $raceCollections,
         ]);
     }
 

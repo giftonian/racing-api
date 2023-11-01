@@ -9,8 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 // Used to hold raw data against a race_id, when a
 /**
- * Raw Data of a Race
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\RacingDataRepository")
  */
 #[ApiResource]
 class RacingData

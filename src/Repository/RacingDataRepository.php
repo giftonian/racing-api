@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\RacingData;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use DoctrineExtensions\Query\Mysql\DateFormat;
 
 /**
  * @extends ServiceEntityRepository<Race>
@@ -39,7 +40,7 @@ class RacingDataRepository extends ServiceEntityRepository
         }
     }
 
-    public function fetchRaceActors(): array
+    public function fetchRacePlayers(): array
     {
         // $entityManager = $this->getEntityManager();  
         // $dql = "SELECT m, a FROM App\Entity\Race m, 
@@ -85,6 +86,69 @@ class RacingDataRepository extends ServiceEntityRepository
 
 
         return [];//iterator_to_array($paginator);
+
+    }
+    public function fetchRaceCollections(): array
+    {
+        $response = ['calling', 'hello fetch race collections'];
+        //$entityManager = $this->getEntityManager();  
+        //$dql = "SELECT * FROM App\Entity\Race m";
+        
+        // $sql = "SELECT r.race_id AS race_id, race.title AS race_title, race.race_date,
+        //     TIME_FORMAT(SEC_TO_TIME(AVG(CASE WHEN r.race_distance = :medium THEN TIME_TO_SEC(r.race_time) ELSE NULL END)), :timeFormat) AS avg_time_medium,
+        //     TIME_FORMAT(SEC_TO_TIME(AVG(CASE WHEN r.race_distance = :long THEN TIME_TO_SEC(r.race_time) ELSE NULL END)), :timeFormat) AS avg_time_long
+        //     FROM racing_data r
+        //     LEFT JOIN race ON r.race_id = race.id
+        //     WHERE r.race_distance IN (:distances)
+        //     GROUP BY race_id, race_title, race_date";
+        //     //echo $sql;
+
+        // $em = $this->getEntityManager();
+        // $query = $em->createNativeQuery($sql,new \Doctrine\ORM\Query\ResultSetMapping());
+
+        // $query->setParameter('medium', 'medium');
+        // $query->setParameter('long', 'long');
+        // $query->setParameter('timeFormat', '%H:%i:%s');
+        // $query->setParameter('distances', ['medium', 'long']);
+
+        // $results = $query->getResult();
+
+        $qb = $this->createQueryBuilder('a');
+
+        $qb->select('a.id as race_id', 'a.title as race_title', 'a.race_date')
+            ->addSelect('TIME_FORMAT(sectotime(AVG(CASE WHEN b.race_distance = :medium THEN timetosec(b.race_time) ELSE :no_time END)), :format) AS avg_time_medium')
+            ->addSelect('TIME_FORMAT(sectotime(AVG(CASE WHEN b.race_distance = :long THEN timetosec(b.race_time) ELSE :no_time END)), :format) AS avg_time_long')            
+            //->from('App\Entity\Race', 'a')           
+            ->leftJoin('App\Entity\RacingData', 'b', 'WITH', 'a.id = b.race_id')            
+            ->where($qb->expr()->in('b.race_distance', ':distances'))
+            ->groupBy('a.id')
+            ->setParameter('medium', 'medium')
+            ->setParameter('long', 'long')
+            ->setParameter('no_time', '00:00:00')
+            ->setParameter('format', '%H:%i:%s')
+            ->setParameter('distances', ['medium', 'long']);
+
+        // $qb->select('a.id as race_id', 'r.title as race_title')
+        //     ->addSelect('TIME_FORMAT(sectotime(AVG(CASE WHEN b.race_distance = :medium THEN timetosec(b.race_time) ELSE :no_time END)), :format) AS avg_time_medium')
+        //     ->addSelect('TIME_FORMAT(sectotime(AVG(CASE WHEN b.race_distance = :long THEN timetosec(b.race_time) ELSE :no_time END)), :format) AS avg_time_long')
+        //     ->leftJoin('App\Entity\Race', 'r', 'WITH', 'a.id = r.id')
+        //     ->leftJoin('App\Entity\RacingData', 'b', 'WITH', 'a.id = b.race_id')
+        //     ->where($qb->expr()->in('b.race_distance', ':distances'))
+        //     ->groupBy('a.id')
+        //     ->setParameter('medium', 'medium')
+        //     ->setParameter('long', 'long')
+        //     ->setParameter('no_time', '00:00:00')
+        //     ->setParameter('format', '%H:%i:%s')
+        //     ->setParameter('distances', ['medium', 'long']);
+
+  
+
+        
+        $results = $qb->getQuery()->getResult();
+        dd($results);
+
+
+        return $response;
 
     }
 

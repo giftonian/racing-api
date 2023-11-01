@@ -10,15 +10,12 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Controller\RaceResults;
-
-
+use App\Repository\RaceRepository;
 
 /**
- * 
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\RaceRepository")
  */
 #[ApiResource]
-#[ORM\Entity(repositoryClass: MovieRepository::class)]
 class Race
 {
    
@@ -38,7 +35,7 @@ class Race
 
     /** 
      * The date of the race 
-     * @ORM\Column(type="date")
+     * @ORM\Column(type="date", name="race_date")
      */ 
     #[Assert\NotBlank]       
     private ?\DateTimeInterface  $raceDate = null; // received as date in API request
