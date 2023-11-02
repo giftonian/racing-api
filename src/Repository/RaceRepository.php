@@ -115,8 +115,7 @@ class RaceRepository extends ServiceEntityRepository
 //    }
 
     public function fetchRaceCollections(): array
-    {
-        $response = ['calling', 'hello fetch race collections'];
+    {        
         //$entityManager = $this->getEntityManager();  
         //$dql = "SELECT * FROM App\Entity\Race m";
         
@@ -154,26 +153,27 @@ class RaceRepository extends ServiceEntityRepository
         //     ->setParameter('format', '%H:%i:%s')
         //     ->setParameter('distances', ['medium', 'long']);
 
-        $qb->select('a.id as race_id', 'a.title as race_title', 'a.raceDate')
+        $qb->select('a.id as race_id', 'a.title as race_title', 'TIME_FORMAT(a.raceDate, :date_format) as race_date')
         ->addSelect('TIME_FORMAT(sectotime(AVG(CASE WHEN b.raceDistance = :medium THEN timetosec(b.raceTime) ELSE :no_time END)), :format) AS avg_time_medium')
         ->addSelect('TIME_FORMAT(sectotime(AVG(CASE WHEN b.raceDistance = :long THEN timetosec(b.raceTime) ELSE :no_time END)), :format) AS avg_time_long')            
         ->leftJoin('App\Entity\RacingData', 'b', 'WITH', 'a.id = b.race') 
-        ->where($qb->expr()->in('b.raceDistance', ':distances'))
+        //->where($qb->expr()->in('b.raceDistance', ':distances'))
         ->groupBy('a.id')
         ->setParameter('medium', 'medium')
         ->setParameter('long', 'long')
         ->setParameter('no_time', '00:00:00')
         ->setParameter('format', '%H:%i:%s')
-        ->setParameter('distances', ['medium', 'long']);
+        ->setParameter('date_format', '%Y-%m-%d');
+        //->setParameter('distances', ['medium', 'long']);
 
 
 
         
         $results = $qb->getQuery()->getResult();
-        dd($results);
+        //dd($results);
 
 
-        return $response;
+        return $results;
 
     }
 }
