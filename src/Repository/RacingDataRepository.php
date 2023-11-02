@@ -39,5 +39,65 @@ class RacingDataRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     } 
+
+    public function fetchRaceResults($race_id): array
+    {   
+        // $qb = $this->createQueryBuilder('rd');
+
+        // $qb->select('rd.race_id, rd.full_name, rd.race_distance, rd.race_time, rd.age_category')
+        // ->addSelect('DENSE_RANK() OVER (ORDER BY rd.race_time) AS overall_placement')
+        // ->addSelect('DENSE_RANK() OVER (PARTITION BY rd.age_category ORDER BY rd.race_time) AS age_cat_placement')
+        // ->where('rd.race_id = :raceId')
+        // ->andWhere('rd.race_distance = :raceDistance')
+        // ->setParameter('raceId', 14)
+        // ->setParameter('raceDistance', 'long')
+        // ->orderBy('overall_placement')
+        // ->addOrderBy('age_cat_placement');
+
+        // $results = $qb->getQuery()->getResult();
+        //dd($results);
+
+        $qb = $this->createQueryBuilder('rd');
+
+        $qb->select('rd.fullName, rd.raceDistance, rd.raceTime, rd.ageCategory')        
+        ->where('rd.race = :raceId')
+        ->andWhere('rd.raceDistance = :raceDistance')
+        ->setParameter('raceId', 14)
+        ->setParameter('raceDistance', 'long')
+        ->orderBy('rd.raceTime');
+        //->addOrderBy('age_cat_placement');
+
+        $results = $qb->getQuery()->getResult();
+
+        $placements = [];
+        $iter = 1;
+        $cat_groups = [];
+        foreach ($results as $key => $row) {
+            $placements[$row['fullName']] = $row;
+            $placements[$row['fullName']]['overall_placement'] = $iter;
+            $iter++;
+
+            $cat_groups[$row['ageCategory']][] = $placements[$row['fullName']];
+        }
+        $iter = 1;
+        foreach ($cat_groups as $age_category => $cat_arr) { // age_category
+            foreach ($cat_arr as $key => $row) {
+                $placements[$row['fullName']]['age_cat_placement'] = $iter;
+                $iter++;
+            }
+            $iter = 1;
+
+        }
+        $placements = array_values($placements);
+        dd($placements);
+
+
+
+        
+
+
+        return $placements;
+
+    }
     
 }

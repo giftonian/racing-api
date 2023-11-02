@@ -165,6 +165,26 @@ class RacingResults extends AbstractController
         ]);
     }
 
+    #[Route('/api/get-race-results', name: 'get_race_results', methods: ['GET'])]    
+    public function getRaceResults(Request $request): JsonResponse
+    {
+        $race_id = 14;
+        $racingDataRepository = $this->em->getRepository(RacingData::class);
+        $raceResults = $racingDataRepository->fetchRaceResults($race_id);
+        if (empty($raceCollections)) {
+            return $this->json([
+                'code' => 401,
+                'message' => 'No data found'
+            ]);
+        }
+
+        return $this->json([
+            'code' => 200,
+            'data' => $raceResults,
+        ]);
+    }
+
+
     public function formatRaceTime($raceTime)
     {
         // Split the time into hours, minutes, and seconds
