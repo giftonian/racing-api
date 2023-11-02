@@ -11,10 +11,10 @@ A sample test task built with Symfony and API Platform
 
 ### Get Races Collection
 - Endpoint: `/api/get-races-collection`
-- Request: GET
+- Request: GET (empty request)
 - Response: code and message/data json
 
 ### Get Results by Race
-- Endpoint: `/api/...`
-- Request:
-- Response:
+- Endpoint: `/api/get-race-results/{raceId}`
+- Request: GET (with race id in the url)
+- Response: code and message/data json

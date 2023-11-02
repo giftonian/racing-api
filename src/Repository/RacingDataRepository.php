@@ -59,10 +59,11 @@ class RacingDataRepository extends ServiceEntityRepository
 
         $qb = $this->createQueryBuilder('rd');
 
+        
         $qb->select('rd.fullName, rd.raceDistance, rd.raceTime, rd.ageCategory')        
         ->where('rd.race = :raceId')
         ->andWhere('rd.raceDistance = :raceDistance')
-        ->setParameter('raceId', 14)
+        ->setParameter('raceId',(int)$race_id)
         ->setParameter('raceDistance', 'long')
         ->orderBy('rd.raceTime');
         //->addOrderBy('age_cat_placement');
@@ -89,13 +90,7 @@ class RacingDataRepository extends ServiceEntityRepository
 
         }
         $placements = array_values($placements);
-        dd($placements);
-
-
-
-        
-
-
+                
         return $placements;
 
     }

@@ -165,13 +165,19 @@ class RacingResults extends AbstractController
         ]);
     }
 
-    #[Route('/api/get-race-results', name: 'get_race_results', methods: ['GET'])]    
-    public function getRaceResults(Request $request): JsonResponse
+    #[Route('/api/get-race-results/{race_id}', name: 'get_race_results', methods: ['GET'])]    
+    public function getRaceResults(Request $request,  $race_id): JsonResponse
     {
-        $race_id = 14;
+        // Check if the JSON data was successfully decoded
+        if ($race_id === null || $race_id === '') {
+            return new JsonResponse(['error' => 'Invalid Race ID'], 400); // Return a 400 Bad Request response
+        }
+        //dd($race_id);
+
+        
         $racingDataRepository = $this->em->getRepository(RacingData::class);
         $raceResults = $racingDataRepository->fetchRaceResults($race_id);
-        if (empty($raceCollections)) {
+        if (empty($raceResults)) {
             return $this->json([
                 'code' => 401,
                 'message' => 'No data found'
