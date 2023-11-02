@@ -9,8 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 // Used to hold generated results against a particular Race
 /**
- * Results generated from RacingData
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\PlacementRepository")
  */
 #[ApiResource]
 class Placement

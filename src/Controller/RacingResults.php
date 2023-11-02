@@ -4,6 +4,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Placement;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -126,6 +127,31 @@ class RacingResults extends AbstractController
                         $this->em->persist($racingData);
                         
                     }
+                    ///////////////////// Working on Placements
+                    /*$racingDataRepository = $this->em->getRepository(RacingData::class);
+                    $raceResults = $racingDataRepository->fetchRaceResults($raceId);
+                    foreach ($raceResults as $key => $row) {                        
+                        $fullName = $row['fullName'];
+                        $raceDistance = $row['raceDistance'];
+                        $raceTime = $row['raceTime'];
+                        $ageCategory = $row['ageCategory'];
+                        $overall_placement = $row['overall_placement'];
+                        $age_cat_placement = $row['age_cat_placement'];
+
+                        $placement = new Placement();
+                        $placement->setFullName($fullName);                        
+                        $placement->setfinishTime($raceTime);
+                        $placement->setAgeCategory($ageCategory);
+                        $placement->setOverAllPlace($overall_placement);
+                        $placement->setAgeCatPlace($age_cat_placement);
+                        
+                        $placement->setRace($race);
+
+                        $this->em->persist($racingData);
+
+
+                    }*/
+                    /////////////////////
                     $this->em->flush();
                     $this->em->commit();
                     fclose($handle);
